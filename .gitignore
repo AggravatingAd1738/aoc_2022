@@ -1,1 +1,3 @@
 /.quarto/
+input_*.txt
+renv
