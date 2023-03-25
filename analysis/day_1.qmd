@@ -85,15 +85,10 @@ collect_calories <- function(.path) {
         .path %>%
         read_file() %>%
         str_split_1("\r\n\r\n") %>%
-        map(.f = ~{
-            str_split_1(.x, "\r\n") %>%
-                as.double() %>%
-                discard(is.na)
-            }
-        ) %>%
-        tibble() %>%
+        str_split("\r\n") %>%
+        map(.f =  ~as.double(.x) %>% discard(is.na)) %>%
+        as_tibble_col(column_name = "calories") %>%
         mutate(elf = row_number()) %>%
-        rename(calories = ".") %>%
         unnest(calories)
 }
 calories_top_elfs <- function(x, n = 1) {
@@ -108,18 +103,16 @@ calories_top_elfs <- function(x, n = 1) {
 ```
 
 ```{r}
-example_data <-
-    here("data", "example_1.txt") %>% collect_calories()
-example_top_elf <- example_data %>% calories_top_elfs()
+example_data <- collect_calories(here("data", "example_1.txt"))
+example_top_elf <- calories_top_elfs(example_data)
 
 example_top_elf
 ```
 
 ```{r}
 #| include: FALSE
-input_data <-
-    here("data", "input_1.txt") %>% collect_calories()
-top_elf <- input_data %>% calories_top_elfs()
+input_data <- collect_calories(here("data", "input_1.txt"))
+top_elf <- calories_top_elfs(input_data)
 
 top_elf
 ```
@@ -144,10 +137,7 @@ Find the top three Elves carrying the most Calories. How many
 Calories are those Elves carrying in total?
 
 ```{r}
-example_top_three <-
-    example_data %>%
-    calories_top_elfs(n = 3)
-
+example_top_three <- calories_top_elfs(example_data, n = 3)
 example_top_three
 ```
 
